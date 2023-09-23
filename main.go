@@ -29,6 +29,7 @@ var reportCmd = &cobra.Command{
 		if err := viper.UnmarshalKey("github.users", &users); err != nil {
 			panic(err)
 		}
+		var foundUsrs []UserDetails
 		for _, u := range users {
 			gUsr, err := GetUserDetails(ctx, client, u)
 			if err != nil {
@@ -61,10 +62,15 @@ var reportCmd = &cobra.Command{
 				}
 			}
 			ud.NumRepos = len(repoSet)
-			fmt.Printf("ud: %+v\n", ud)
+
+			foundUsrs = append(foundUsrs, ud)
 		}
 		// Write logic here to pull user details from Github v3 API over the given date range and generate the report
-
+		fmt.Printf("| %s | %s | %s | %s | %s | %s |\n", "Name", "User name", "Commits", "PRs opened", "PR Reviews", "Repos worked on")
+		fmt.Printf("| %s | %s | %s | %s | %s | %s |\n", "---", "---", "---", "---", "---", "---")
+		for _, u := range foundUsrs {
+			fmt.Printf("| %s | %s | %d | %d | %d| %d |\n", u.Name, u.UserName, u.NumCommits, u.NumPullRequests, u.NumPullRequestReviews, u.NumRepos)
+		}
 		fmt.Printf("Report generated from %s to %s\n", startDate.Format(time.DateOnly), endDate.Format(time.DateOnly))
 	},
 }
